@@ -54,31 +54,25 @@ void parallel_BFS(vector<vector<int>>& adj, int n,int start) {
     visited[start] = true;
     q.push(start);
     
-    while (!q.empty()) {
-        int size = q.size();
-        vector<int> level_nodes;
-        
-        #pragma omp parallel 
-        {
-            #pragma omp for schedule(dynamic)
-            for (int i = 0; i < size; ++i) {
-                int node;
-                #pragma omp critical
-                {
+    #pragma omp parallel
+    {
+        while (!q.empty()) {
+            int node;
+            {
+                if (!q.empty()) {
                     node = q.front();
                     q.pop();
                 }
-                
-                #pragma omp critical
-                cout << node << " ";
+            }
+            cout << node << " ";
 
-                for (auto x : adj[node]) {
-                    if (!visited[x]) {
-                        #pragma omp critical
-                        {
-                            q.push(x);
-                            visited[x] = true;
-                        }
+            #pragma omp for schedule(dynamic)
+            for (auto x : adj[node]) {
+                if (!visited[x]) {
+                    #pragma omp critical
+                    {
+                        q.push(x);
+                        visited[x] = true;
                     }
                 }
             }
@@ -97,15 +91,12 @@ void parallel_DFS(vector<vector<int>>& adj_matrix, int n,int start) {
     {
         while (!s.empty()) {
             int node;
-            #pragma omp critical
             {
                 if (!s.empty()) {
                     node = s.top();
                     s.pop();
                 }
             }
-            
-            #pragma omp critical
             cout << node << " ";
 
             #pragma omp for schedule(dynamic)
